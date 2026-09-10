@@ -171,7 +171,7 @@ export default function MemoryLane() {
     <section
       ref={ref}
       className="relative"
-      style={{ height: `${memories.length * 80}vh`, minHeight: '600px' }}
+      style={{ height: `${memories.length * 80}vh`, minHeight: '600px', contentVisibility: 'auto', containIntrinsicSize: '0 600px' }}
     >
       <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
 
