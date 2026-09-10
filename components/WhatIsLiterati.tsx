@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 export default function WhatIsLiterati() {
   const ref = useRef<HTMLDivElement>(null)
@@ -11,7 +11,8 @@ export default function WhatIsLiterati() {
     offset: ['start 80%', 'end 20%'],
   })
 
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 50, damping: 18, restDelta: 0.001 })
+  // Use raw scroll progress — no spring (spring causes forced reflow every frame)
+  const smoothProgress = scrollYProgress
 
   const words = [
     'A place', 'where', 'students', 'speak', 'their', 'minds,',
