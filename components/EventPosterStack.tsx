@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion'
 import { literati } from '@/data/literati'
 
 const POSTER_ATMOSPHERES = [
@@ -63,70 +63,74 @@ const POSTER_ATMOSPHERES = [
   },
 ]
 
-const CARD_VARIANTS = {
-  hidden: { opacity: 0, y: 60, scale: 0.92 },
+// ─── Entry animation variants — all cards pop in together ─────────────────────
+const ENTRY_VARIANTS = {
+  hidden: { opacity: 0, y: 80, scale: 0.88 },
   visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      delay: i * 0.08,
-      duration: 0.55,
-      ease: [0.22, 1, 0.36, 1],
-    },
+    opacity: 1, y: 0, scale: 1,
+    transition: { delay: i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   }),
 }
 
+// ─── Main section ─────────────────────────────────────────────────────────────
 export default function EventPosterStack() {
   const [selected, setSelected] = useState<number | null>(null)
-  const ref = useRef<HTMLElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-15% 0px' })
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(sectionRef, { once: true, margin: '-10% 0px' })
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end end'],
+  })
+
   const events = literati.events
 
   return (
-    <section
-      ref={ref}
-      style={{ padding: '8vh 0 10vh', position: 'relative', contentVisibility: 'auto' }}
-    >
-      {/* Section label */}
-      <div style={{ textAlign: 'center', marginBottom: '4vh' }}>
-        <p className="eyebrow" style={{ letterSpacing: '0.3em', color: 'rgba(201,125,46,0.7)', fontSize: '0.6rem' }}>
-          Events
-        </p>
-        <h2 style={{
-          fontFamily: 'Georgia, serif',
-          fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-          color: 'rgba(240,230,200,0.85)',
-          fontWeight: 400,
-          marginTop: '0.5rem',
-        }}>
-          What we do
-        </h2>
-      </div>
+    <div ref={sectionRef} style={{ position: 'relative', height: `${events.length * 100}vh` }}>
+      <div
+        className="sticky top-0 h-screen overflow-hidden"
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
+      >
+        {/* Section eyebrow */}
+        <div style={{ position: 'absolute', top: '2.5rem', left: 'clamp(1.5rem, 5vw, 4rem)', zIndex: 20 }}>
+          <p style={{
+            fontFamily: '-apple-system, sans-serif',
+            fontSize: '0.55rem',
+            fontWeight: 600,
+            letterSpacing: '0.32em',
+            textTransform: 'uppercase',
+            color: 'rgba(201,125,46,0.65)',
+          }}>
+            Events
+          </p>
+        </div>
 
-      {/* Cards grid — all pop up together */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1.25rem',
-        maxWidth: 1100,
-        margin: '0 auto',
-        padding: '0 clamp(1rem, 5vw, 3rem)',
-      }}>
-        {events.map((event, i) => (
-          <motion.div
-            key={event.id}
-            custom={i}
-            variants={CARD_VARIANTS}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            onClick={() => setSelected(i)}
-            style={{ cursor: 'pointer' }}
-            whileHover={{ y: -6, transition: { duration: 0.25 } }}
-          >
-            <PosterCard event={event} atmosphere={POSTER_ATMOSPHERES[i]} />
-          </motion.div>
-        ))}
+        {/* Cards stacked in center — each scroll-driven */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {events.map((event, i) => (
+            <ScrollCard
+              key={event.id}
+              event={event}
+              atmosphere={POSTER_ATMOSPHERES[i]}
+              index={i}
+              total={events.length}
+              scrollYProgress={scrollYProgress}
+              inView={inView}
+              onSelect={() => setSelected(i)}
+            />
+          ))}
+        </div>
+
+        {/* Pagination dots */}
+        <div style={{
+          position: 'absolute', bottom: '2.5rem', left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex', gap: '0.6rem', alignItems: 'center', zIndex: 20,
+        }}>
+          {events.map((_, i) => (
+            <PaginationDot key={i} index={i} total={events.length} scrollYProgress={scrollYProgress} />
+          ))}
+        </div>
       </div>
 
       {/* Detail overlay */}
@@ -139,127 +143,221 @@ export default function EventPosterStack() {
           />
         )}
       </AnimatePresence>
-    </section>
+    </div>
   )
 }
 
+// ─── Individual card — entry pop + scroll in/out ───────────────────────────────
+function ScrollCard({
+  event, atmosphere, index, total, scrollYProgress, inView, onSelect,
+}: {
+  event: typeof literati.events[0]
+  atmosphere: typeof POSTER_ATMOSPHERES[0]
+  index: number
+  total: number
+  scrollYProgress: any
+  inView: boolean
+  onSelect: () => void
+}) {
+  const seg = 1 / total
+  const segStart = index * seg
+  const segEnd   = (index + 1) * seg
+  const fromLeft = index % 2 === 0
+
+  // X — slide in from alt sides, exit to opposite
+  const x = useTransform(
+    scrollYProgress,
+    index === 0
+      ? [0, segEnd - seg * 0.1, segEnd]
+      : [segStart - seg * 0.05, segStart + seg * 0.3, segEnd - seg * 0.1, segEnd],
+    index === 0
+      ? ['0vw', '0vw', fromLeft ? '-62vw' : '62vw']
+      : [fromLeft ? '-82vw' : '82vw', '0vw', '0vw', fromLeft ? '-62vw' : '62vw'],
+  )
+
+  // Scale
+  const scale = useTransform(
+    scrollYProgress,
+    index === 0
+      ? [0, segEnd - seg * 0.1, segEnd]
+      : [segStart - seg * 0.05, segStart + seg * 0.3, segEnd - seg * 0.1, segEnd],
+    index === 0
+      ? [1, 1, 0.86]
+      : [0.86, 1, 1, 0.86],
+  )
+
+  // Opacity
+  const opacity = useTransform(
+    scrollYProgress,
+    index === 0
+      ? [0, 0.01, segEnd - seg * 0.06, segEnd]
+      : [segStart - seg * 0.06, segStart + seg * 0.25, segEnd - seg * 0.06, segEnd],
+    index === 0 ? [1, 1, 1, 0] : [0, 1, 1, 0],
+  )
+
+  // Rotation on entry
+  const rotate = useTransform(
+    scrollYProgress,
+    [segStart, segStart + seg * 0.3],
+    index === 0 ? [0, 0] : [fromLeft ? -3 : 3, 0],
+  )
+
+  return (
+    <motion.div
+      // Entry pop animation (all cards animate in on first enter)
+      custom={index}
+      variants={ENTRY_VARIANTS}
+      initial="hidden"
+      animate={inView ? 'visible' : 'hidden'}
+      // Scroll-driven position on top of entry
+      style={{
+        x, scale, opacity, rotate,
+        position: 'absolute',
+        zIndex: index,
+        cursor: 'pointer',
+      }}
+      onClick={onSelect}
+      whileHover={{ y: -6, transition: { duration: 0.22 } }}
+    >
+      <PosterCard event={event} atmosphere={atmosphere} />
+    </motion.div>
+  )
+}
+
+// ─── Poster card visual ────────────────────────────────────────────────────────
 function PosterCard({
-  event,
-  atmosphere,
+  event, atmosphere,
 }: {
   event: typeof literati.events[0]
   atmosphere: typeof POSTER_ATMOSPHERES[0]
 }) {
   return (
-    <div style={{
-      height: 'clamp(320px, 45vh, 480px)',
-      position: 'relative',
-      overflow: 'hidden',
-      borderRadius: '12px',
-      boxShadow: '0 30px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.07)',
-    }}>
-      {/* Base gradient */}
+    <div
+      style={{
+        width: 'min(420px, 86vw)',
+        height: 'min(600px, 78vh)',
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '12px',
+        boxShadow: '0 50px 140px rgba(0,0,0,0.82), 0 12px 40px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.07)',
+      }}
+    >
+      {/* Base + atmosphere */}
       <div style={{ position: 'absolute', inset: 0, background: event.gradient }} />
-
-      {/* Atmospheric layers */}
       {atmosphere.layers.map((layer, li) => (
         <div key={li} style={{ position: 'absolute', inset: 0, background: layer.gradient }} />
       ))}
 
-      {/* Noise texture */}
+      {/* Noise */}
       <div style={{
-        position: 'absolute', inset: 0, opacity: 0.06,
+        position: 'absolute', inset: 0, opacity: 0.07,
         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
         backgroundSize: '250px',
       }} />
 
       {/* Tag row */}
-      <div style={{ position: 'absolute', top: 20, left: 20, right: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ position: 'absolute', top: 28, left: 28, right: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
         <span style={{
-          fontFamily: '-apple-system, sans-serif',
-          fontSize: '0.5rem',
-          fontWeight: 600,
-          letterSpacing: '0.28em',
-          textTransform: 'uppercase',
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.52rem',
+          fontWeight: 600, letterSpacing: '0.28em', textTransform: 'uppercase',
           color: 'rgba(255,255,255,0.38)',
         }}>
           {event.tag}
         </span>
         <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', color: 'rgba(255,255,255,0.12)' }}>
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', color: 'rgba(255,255,255,0.13)' }}>
           {atmosphere.symbol}
         </span>
       </div>
 
-      {/* Center content */}
+      {/* Center */}
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', padding: '0 24px',
+        textAlign: 'center', padding: '0 36px',
       }}>
         <p style={{
           fontFamily: 'Georgia, serif',
-          fontSize: 'clamp(1.6rem, 5vw, 2.4rem)',
+          fontSize: 'clamp(2.4rem, 7vw, 3.8rem)',
           fontWeight: 700,
-          lineHeight: 0.95,
-          letterSpacing: '-0.03em',
-          color: 'rgba(255,255,255,0.95)',
-          marginBottom: '0.9rem',
-          textShadow: '0 2px 16px rgba(0,0,0,0.5)',
+          lineHeight: 0.92,
+          letterSpacing: '-0.035em',
+          color: 'rgba(255,255,255,0.97)',
+          marginBottom: '1.1rem',
+          textShadow: '0 2px 20px rgba(0,0,0,0.45)',
         }}>
           {event.title}
         </p>
         <p style={{
           fontFamily: '-apple-system, sans-serif',
-          fontSize: '0.52rem',
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          color: atmosphere.accent,
-          opacity: 0.85,
-          marginBottom: '1.4rem',
+          fontSize: '0.54rem', letterSpacing: '0.24em',
+          textTransform: 'uppercase', color: atmosphere.accent, opacity: 0.85,
+          marginBottom: '1.8rem',
         }}>
           {event.subtitle}
         </p>
-        <div style={{ width: 28, height: 1, background: 'rgba(255,255,255,0.18)', marginBottom: '1.4rem' }} />
+        <div style={{ width: 32, height: 1, background: 'rgba(255,255,255,0.18)', marginBottom: '1.8rem' }} />
         <p style={{
-          fontFamily: 'Georgia, serif',
-          fontStyle: 'italic',
-          fontSize: '0.78rem',
-          color: 'rgba(255,255,255,0.48)',
-          lineHeight: 1.6,
-          maxWidth: 200,
+          fontFamily: 'Georgia, serif', fontStyle: 'italic',
+          fontSize: '0.88rem', color: 'rgba(255,255,255,0.5)',
+          lineHeight: 1.65, maxWidth: 260,
         }}>
           {event.theme}
         </p>
       </div>
 
-      {/* Tap hint */}
+      {/* Bottom blurb */}
       <div style={{
-        position: 'absolute', bottom: 18, left: 0, right: 0,
-        display: 'flex', justifyContent: 'center',
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        padding: '56px 28px 26px',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)',
       }}>
-        <span style={{
-          fontFamily: '-apple-system, sans-serif',
-          fontSize: '0.48rem',
-          letterSpacing: '0.2em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.22)',
+        <p style={{
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.76rem',
+          color: 'rgba(255,255,255,0.44)', lineHeight: 1.65,
         }}>
-          tap to explore
-        </span>
+          {event.blurb}
+        </p>
+        <p style={{
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.46rem',
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.2)', marginTop: '0.8rem',
+        }}>
+          tap for details
+        </p>
       </div>
 
-      {/* Inner shadow frame */}
-      <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 60px rgba(0,0,0,0.35)', pointerEvents: 'none' }} />
+      {/* Inner vignette */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        boxShadow: 'inset 0 0 80px rgba(0,0,0,0.38)',
+        pointerEvents: 'none',
+      }} />
     </div>
   )
 }
 
+// ─── Pagination dot ────────────────────────────────────────────────────────────
+function PaginationDot({ index, total, scrollYProgress }: {
+  index: number; total: number; scrollYProgress: any
+}) {
+  const seg = 1 / total
+  const start = index * seg
+  const end   = (index + 1) * seg
+
+  const width   = useTransform(scrollYProgress, [start, start + 0.02, end - 0.02, end], [4, 20, 20, 4])
+  const opacity = useTransform(scrollYProgress, [start, start + 0.02, end - 0.02, end], [0.25, 1, 1, 0.25])
+  const bg      = useTransform(scrollYProgress, [start, start + 0.02], ['rgba(160,152,128,1)', 'rgba(201,125,46,1)'])
+
+  return (
+    <motion.div style={{ width, opacity, backgroundColor: bg, height: 3, borderRadius: 2 }} />
+  )
+}
+
+// ─── Detail overlay ────────────────────────────────────────────────────────────
 function EventDetailOverlay({
-  event,
-  atmosphere,
-  onClose,
+  event, atmosphere, onClose,
 }: {
   event: typeof literati.events[0]
   atmosphere: typeof POSTER_ATMOSPHERES[0]
@@ -272,88 +370,74 @@ function EventDetailOverlay({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.22 }}
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 50,
-          background: 'rgba(4,2,10,0.82)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
+          background: 'rgba(4,2,10,0.80)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           cursor: 'pointer',
         }}
       />
 
       {/* Panel */}
       <motion.div
-        initial={{ opacity: 0, y: 48, scale: 0.96 }}
+        initial={{ opacity: 0, y: 52, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 32, scale: 0.97 }}
         transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          position: 'fixed',
-          top: '50%', left: '50%',
+          position: 'fixed', top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 51,
           width: 'min(560px, 92vw)',
           maxHeight: '88vh',
           overflowY: 'auto',
           borderRadius: '18px',
-          background: 'rgba(12,8,22,0.96)',
+          background: 'rgba(12,8,22,0.97)',
           border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 60px 160px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04)',
+          boxShadow: '0 60px 160px rgba(0,0,0,0.92)',
         }}
       >
-        {/* Header band — uses the event's own gradient */}
-        <div style={{
-          position: 'relative', overflow: 'hidden',
-          height: 180, borderRadius: '18px 18px 0 0',
-        }}>
+        {/* Header */}
+        <div style={{ position: 'relative', overflow: 'hidden', height: 190, borderRadius: '18px 18px 0 0' }}>
           <div style={{ position: 'absolute', inset: 0, background: event.gradient }} />
           {atmosphere.layers.map((layer, li) => (
             <div key={li} style={{ position: 'absolute', inset: 0, background: layer.gradient }} />
           ))}
 
-          {/* Close button */}
           <button
             onClick={onClose}
             style={{
               position: 'absolute', top: 16, right: 16,
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'rgba(0,0,0,0.4)',
+              width: 34, height: 34, borderRadius: '50%',
+              background: 'rgba(0,0,0,0.45)',
               border: '1px solid rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: '1rem', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: '1.1rem', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              lineHeight: 1,
             }}
             aria-label="Close"
           >
             ×
           </button>
 
-          {/* Tag */}
           <div style={{ position: 'absolute', top: 20, left: 24 }}>
             <span style={{
-              fontFamily: '-apple-system, sans-serif',
-              fontSize: '0.5rem',
-              fontWeight: 600,
-              letterSpacing: '0.28em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.45)',
+              fontFamily: '-apple-system, sans-serif', fontSize: '0.5rem',
+              fontWeight: 600, letterSpacing: '0.28em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.42)',
             }}>
               {event.tag}
             </span>
           </div>
 
-          {/* Title inside header */}
-          <div style={{
-            position: 'absolute', bottom: 20, left: 24, right: 60,
-          }}>
+          <div style={{ position: 'absolute', bottom: 22, left: 24, right: 60 }}>
             <p style={{
               fontFamily: 'Georgia, serif',
-              fontSize: 'clamp(1.8rem, 5vw, 2.6rem)',
-              fontWeight: 700,
-              lineHeight: 0.95,
+              fontSize: 'clamp(1.9rem, 5vw, 2.7rem)',
+              fontWeight: 700, lineHeight: 0.95,
               color: 'rgba(255,255,255,0.97)',
               letterSpacing: '-0.03em',
               textShadow: '0 2px 20px rgba(0,0,0,0.5)',
@@ -361,12 +445,9 @@ function EventDetailOverlay({
               {event.title}
             </p>
             <p style={{
-              fontFamily: '-apple-system, sans-serif',
-              fontSize: '0.52rem',
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              color: atmosphere.accent,
-              marginTop: '0.5rem',
+              fontFamily: '-apple-system, sans-serif', fontSize: '0.52rem',
+              letterSpacing: '0.22em', textTransform: 'uppercase',
+              color: atmosphere.accent, marginTop: '0.5rem',
             }}>
               {event.subtitle}
             </p>
@@ -374,52 +455,36 @@ function EventDetailOverlay({
         </div>
 
         {/* Body */}
-        <div style={{ padding: '28px 28px 32px' }}>
-          {/* Theme */}
+        <div style={{ padding: '28px 28px 34px' }}>
           <p style={{
-            fontFamily: 'Georgia, serif',
-            fontStyle: 'italic',
-            fontSize: '1rem',
-            color: 'rgba(255,255,255,0.62)',
-            lineHeight: 1.65,
-            marginBottom: '1.5rem',
+            fontFamily: 'Georgia, serif', fontStyle: 'italic',
+            fontSize: '1rem', color: 'rgba(255,255,255,0.6)',
+            lineHeight: 1.65, marginBottom: '1.4rem',
           }}>
             "{event.theme}"
           </p>
-
-          {/* Blurb */}
           <p style={{
-            fontFamily: '-apple-system, sans-serif',
-            fontSize: '0.82rem',
-            color: 'rgba(255,255,255,0.52)',
-            lineHeight: 1.75,
-            marginBottom: '2rem',
+            fontFamily: '-apple-system, sans-serif', fontSize: '0.82rem',
+            color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: '2rem',
           }}>
             {event.blurb}
           </p>
 
-          {/* Divider */}
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: '1.8rem' }} />
 
-          {/* Detail rows */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 1.5rem' }}>
             {atmosphere.details.map((d, i) => (
               <div key={i}>
                 <p style={{
-                  fontFamily: '-apple-system, sans-serif',
-                  fontSize: '0.48rem',
-                  letterSpacing: '0.22em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.28)',
-                  marginBottom: '0.35rem',
+                  fontFamily: '-apple-system, sans-serif', fontSize: '0.48rem',
+                  letterSpacing: '0.22em', textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.28)', marginBottom: '0.35rem',
                 }}>
                   {d.label}
                 </p>
                 <p style={{
-                  fontFamily: 'Georgia, serif',
-                  fontSize: '0.85rem',
-                  color: atmosphere.accent,
-                  lineHeight: 1.45,
+                  fontFamily: 'Georgia, serif', fontSize: '0.85rem',
+                  color: atmosphere.accent, lineHeight: 1.45,
                 }}>
                   {d.value}
                 </p>
