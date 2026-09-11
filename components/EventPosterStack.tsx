@@ -496,23 +496,30 @@ function EventDetailOverlay({
         }}
       />
 
-      {/* Panel */}
+      {/* Panel — outer div holds the centering, inner motion.div animates */}
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 51,
+        width: 'min(560px, 92vw)',
+        maxHeight: '88vh',
+        display: 'flex',
+        pointerEvents: 'none',
+      }}>
       <motion.div
         initial={{ opacity: 0, y: 52, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 32, scale: 0.97 }}
         transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          position: 'fixed', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 51,
-          width: 'min(560px, 92vw)',
+          width: '100%',
           maxHeight: '88vh',
           overflowY: 'auto',
           borderRadius: '18px',
           background: 'rgba(12,8,22,0.97)',
           border: '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 60px 160px rgba(0,0,0,0.92)',
+          pointerEvents: 'auto',
         }}
       >
         {/* Header */}
@@ -608,6 +615,7 @@ function EventDetailOverlay({
           </div>
         </div>
       </motion.div>
+      </div>
     </>
   )
 }
