@@ -78,11 +78,10 @@ function PhotoScene({
 
     // ── Haze opacity — ambient color cloud peaks just before/after image ────
     let hazeOp = 0
-    const hazePeak = (inStart + outEnd) / 2
     if (p < inStart)       hazeOp = 0
-    else if (p < inEnd)    hazeOp = remap(p, inStart, inEnd, 0, 0.85)
-    else if (p < outStart) hazeOp = 0.85
-    else                   hazeOp = remap(p, outStart, outEnd, 0.85, 0)
+    else if (p < inEnd)    hazeOp = remap(p, inStart, inEnd, 0, 1)
+    else if (p < outStart) hazeOp = 1
+    else                   hazeOp = remap(p, outStart, outEnd, 1, 0)
 
     if (hazeRef.current)  hazeRef.current.style.opacity  = String(Math.round(hazeOp  * 1000) / 1000)
     if (haze2Ref.current) haze2Ref.current.style.opacity = String(Math.round(hazeOp * 0.55 * 1000) / 1000)
@@ -315,9 +314,9 @@ export default function ScrollDiffusionGallery({
   )
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 32,
-    damping: 20,
-    restDelta: 0.0004,
+    stiffness: 120,
+    damping: 28,
+    restDelta: 0.0002,
   })
 
   return (
