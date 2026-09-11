@@ -16,7 +16,7 @@ const PHOTO_LAYOUT = [
   { rotate:  5,  yOffset: -20, scale: 0.90, size: 220 },
 ]
 
-// SVG string-light path — matches reference: bright warm glow, nodes at each photo
+// SVG paper-plane trail — loose dashed curves, hand-drawn feel
 function WirePath({ memories }: { memories: typeof literati.memories }) {
   const GAP = 320
   const count = memories.length
@@ -24,28 +24,29 @@ function WirePath({ memories }: { memories: typeof literati.memories }) {
   const H = 420
   const midY = H / 2
 
-  // Compute anchor point for each photo (where the string "touches" the card)
+  // Anchor at each photo centre
   const anchors: { x: number; y: number }[] = memories.map((_, i) => {
     const layout = PHOTO_LAYOUT[i % PHOTO_LAYOUT.length]
     return {
       x: 80 + i * GAP + GAP / 2,
-      y: midY + layout.yOffset * 0.55,
+      y: midY + layout.yOffset * 0.6,
     }
   })
 
-  // Build smooth cubic bezier through all anchors
+  // Smooth path through anchors with looping S-curves like the paper plane trail
   let d = `M 0 ${midY}`
   anchors.forEach((pt, i) => {
     const prev = i === 0 ? { x: 0, y: midY } : anchors[i - 1]
-    const c1x = prev.x + (pt.x - prev.x) * 0.5
-    const c1y = prev.y
-    const c2x = prev.x + (pt.x - prev.x) * 0.5
-    const c2y = pt.y
+    // Control points arc away from the straight line for a swooping feel
+    const dx = pt.x - prev.x
+    const c1x = prev.x + dx * 0.35
+    const c1y = prev.y - 55          // arc up from previous
+    const c2x = prev.x + dx * 0.65
+    const c2y = pt.y + 55            // swoop down into next
     d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${pt.x} ${pt.y}`
   })
-  // Trail off to the right
   const last = anchors[anchors.length - 1]
-  d += ` C ${last.x + 100} ${last.y}, ${last.x + 180} ${midY}, ${W} ${midY}`
+  d += ` C ${last.x + 120} ${last.y - 40}, ${last.x + 200} ${midY + 20}, ${W} ${midY}`
 
   return (
     <svg
@@ -62,50 +63,24 @@ function WirePath({ memories }: { memories: typeof literati.memories }) {
       }}
       aria-hidden="true"
     >
-      <defs>
-        {/* Wide soft glow */}
-        <filter id="string-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="6" result="blur1" />
-          <feGaussianBlur stdDeviation="2" result="blur2" />
-          <feMerge>
-            <feMergeNode in="blur1" />
-            <feMergeNode in="blur2" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        {/* Tight node glow */}
-        <filter id="node-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <radialGradient id="node-grad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(255,240,200,1)" />
-          <stop offset="60%" stopColor="rgba(240,180,80,0.8)" />
-          <stop offset="100%" stopColor="rgba(201,125,46,0)" />
-        </radialGradient>
-      </defs>
-
-      {/* Outermost wide glow — very soft, warm amber */}
-      <path d={d} fill="none" stroke="rgba(220,140,40,0.18)" strokeWidth="18" filter="url(#string-glow)" />
-      {/* Mid glow layer */}
-      <path d={d} fill="none" stroke="rgba(240,180,80,0.35)" strokeWidth="8" filter="url(#string-glow)" />
-      {/* Core bright string */}
-      <path d={d} fill="none" stroke="rgba(255,230,150,0.92)" strokeWidth="1.5" strokeLinecap="round" />
-
-      {/* Glowing node dots at each photo anchor */}
-      {anchors.map((pt, i) => (
-        <g key={i} filter="url(#node-glow)">
-          {/* Outer halo */}
-          <circle cx={pt.x} cy={pt.y} r="10" fill="url(#node-grad)" opacity="0.7" />
-          {/* Inner bright dot */}
-          <circle cx={pt.x} cy={pt.y} r="3.5" fill="rgba(255,245,210,0.98)" />
-          {/* Tiny core */}
-          <circle cx={pt.x} cy={pt.y} r="1.5" fill="white" />
-        </g>
-      ))}
+      {/* Subtle shadow so dashes lift off the dark background */}
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(0,0,0,0.3)"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray="1 18"
+      />
+      {/* Main dashed trail — warm cream, paper-plane style */}
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(240,220,170,0.88)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeDasharray="1 18"
+      />
     </svg>
   )
 }
