@@ -56,14 +56,14 @@ function PhotoScene({
 
     if (wrapRef.current) wrapRef.current.style.opacity = String(Math.round(opacity * 1000) / 1000)
 
-    // ── Image blur — enters blurry, peaks clear, exits blurry ───────────────
+    // ── Image blur — enters blurry, peaks sharp, exits blurry ───────────────
     let blur = 0
     if (p < inEnd) {
-      blur = remap(p, inStart, inEnd, 28, 2)
+      blur = remap(p, inStart, inEnd, 22, 0)
     } else if (p < outStart) {
-      blur = 2
+      blur = 0
     } else {
-      blur = remap(p, outStart, outEnd, 2, 26)
+      blur = remap(p, outStart, outEnd, 0, 20)
     }
     // Image scale — slight zoom-out as it surfaces
     let scale = 1
@@ -72,7 +72,7 @@ function PhotoScene({
     else                   scale = remap(p, outStart, outEnd, 1.01, 1.07)
 
     if (imgRef.current) {
-      imgRef.current.style.filter = `blur(${blur.toFixed(1)}px) saturate(0.62) brightness(0.82)`
+      imgRef.current.style.filter = `blur(${blur.toFixed(1)}px) saturate(0.75) brightness(0.95)`
       imgRef.current.style.transform = `scale(${scale.toFixed(4)})`
     }
 
@@ -94,13 +94,13 @@ function PhotoScene({
   // The organic mask — multi-radial gradient that dissolves the corners more strongly
   // The percentages create an irregular "ink dissolve" shape: corners pull in faster
   const organicMask = `
-    radial-gradient(ellipse 74% 68% at ${cx} ${cy},
+    radial-gradient(ellipse 82% 76% at ${cx} ${cy},
       black 0%,
-      black 32%,
-      rgba(0,0,0,0.82) 48%,
-      rgba(0,0,0,0.45) 62%,
-      rgba(0,0,0,0.10) 74%,
-      transparent 84%
+      black 45%,
+      rgba(0,0,0,0.80) 60%,
+      rgba(0,0,0,0.35) 74%,
+      rgba(0,0,0,0.08) 84%,
+      transparent 92%
     ),
     radial-gradient(ellipse 52% 46% at 18% 18%,
       transparent 0%,
@@ -246,9 +246,9 @@ function Vignette() {
         pointerEvents: 'none',
         background: `
           radial-gradient(ellipse 85% 70% at 50% 50%,
-            transparent 30%,
-            rgba(3,2,8,0.50) 65%,
-            rgba(3,2,8,0.88) 100%
+            transparent 40%,
+            rgba(3,2,8,0.35) 68%,
+            rgba(3,2,8,0.78) 100%
           )
         `,
       }}

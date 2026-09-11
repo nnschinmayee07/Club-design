@@ -5,7 +5,7 @@ import ScrollDiffusionGallery, { type DiffusionScene } from './ScrollDiffusionGa
 const PAGE_SCENES: DiffusionScene[] = [
   // What Is Literati — deep violet, photo left-of-center
   {
-    image: '/images/library-wide-1.jpg',
+    image: '/images/library-wide-1.svg',
     accent: 'rgba(75,10,160,0.62)',
     accentSecondary: 'rgba(130,15,110,0.42)',
     position: 'center 30%',
@@ -15,7 +15,7 @@ const PAGE_SCENES: DiffusionScene[] = [
   },
   // Events — magenta, photo right-of-center
   {
-    image: '/images/debate-session.jpg',
+    image: '/images/debate-session.svg',
     accent: 'rgba(150,12,125,0.58)',
     accentSecondary: 'rgba(55,8,195,0.38)',
     position: 'center 40%',
@@ -25,7 +25,7 @@ const PAGE_SCENES: DiffusionScene[] = [
   },
   // Event Posters — indigo/blue, photo center-low
   {
-    image: '/images/talkmasters.jpg',
+    image: '/images/talkmasters.svg',
     accent: 'rgba(30,45,185,0.56)',
     accentSecondary: 'rgba(100,10,155,0.40)',
     position: 'center 35%',
@@ -35,7 +35,7 @@ const PAGE_SCENES: DiffusionScene[] = [
   },
   // Memory Lane — richest, deep purple/magenta
   {
-    image: '/images/campus-group.jpg',
+    image: '/images/campus-group.svg',
     accent: 'rgba(105,8,150,0.65)',
     accentSecondary: 'rgba(175,18,95,0.42)',
     position: 'center 45%',

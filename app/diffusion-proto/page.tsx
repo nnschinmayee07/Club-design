@@ -9,7 +9,7 @@ import ScrollDiffusionGallery, { type DiffusionScene } from '@/components/diffus
 
 const SCENES: DiffusionScene[] = [
   {
-    image: '/images/library-wide-1.jpg',
+    image: '/images/library-wide-1.svg',
     accent: 'rgba(75,12,160,0.65)',
     accentSecondary: 'rgba(140,20,120,0.45)',
     position: 'center 30%',
@@ -18,7 +18,7 @@ const SCENES: DiffusionScene[] = [
     outStart: 0.28, outEnd: 0.40,
   },
   {
-    image: '/images/debate-session.jpg',
+    image: '/images/debate-session.svg',
     accent: 'rgba(140,15,130,0.60)',
     accentSecondary: 'rgba(60,10,200,0.40)',
     position: 'center 40%',
@@ -27,7 +27,7 @@ const SCENES: DiffusionScene[] = [
     outStart: 0.58, outEnd: 0.70,
   },
   {
-    image: '/images/talkmasters.jpg',
+    image: '/images/talkmasters.svg',
     accent: 'rgba(35,50,180,0.58)',
     accentSecondary: 'rgba(120,15,160,0.42)',
     position: 'center 35%',
@@ -36,7 +36,7 @@ const SCENES: DiffusionScene[] = [
     outStart: 0.84, outEnd: 0.93,
   },
   {
-    image: '/images/campus-group.jpg',
+    image: '/images/campus-group.svg',
     accent: 'rgba(110,10,155,0.62)',
     accentSecondary: 'rgba(180,20,100,0.38)',
     position: 'center 45%',
