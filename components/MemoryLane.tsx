@@ -89,7 +89,7 @@ function Polaroid({
         background: '#f0ead8',
         padding: '10px 10px 36px 10px',
         boxShadow: '0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3)',
-        borderRadius: '2px',
+        borderRadius: '16px',
       }}>
         {/* Photo area */}
         <div style={{
@@ -98,6 +98,7 @@ function Polaroid({
           overflow: 'hidden',
           position: 'relative',
           background: memory.placeholder,
+          borderRadius: '8px',
         }}>
           {/* Atmospheric gradient overlay to make placeholder feel photographic */}
           <div style={{
