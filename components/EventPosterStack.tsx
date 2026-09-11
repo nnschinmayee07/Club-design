@@ -208,15 +208,15 @@ function ScrollCard({
   const segEnd   = (index + 1) * seg
   const fromLeft = index % 2 === 0
 
-  // X — slide in from alt sides, exit to opposite
+  // X — enters from one side, exits from the OPPOSITE side (alternating switch)
   const x = useTransform(
     scrollYProgress,
     index === 0
       ? [0, segEnd - seg * 0.1, segEnd]
       : [segStart - seg * 0.05, segStart + seg * 0.3, segEnd - seg * 0.1, segEnd],
     index === 0
-      ? ['0vw', '0vw', fromLeft ? '-62vw' : '62vw']
-      : [fromLeft ? '-82vw' : '82vw', '0vw', '0vw', fromLeft ? '-62vw' : '62vw'],
+      ? ['0vw', '0vw', fromLeft ? '62vw' : '-62vw']   // card 0: exits opposite to its even/odd
+      : [fromLeft ? '-82vw' : '82vw', '0vw', '0vw', fromLeft ? '62vw' : '-62vw'],  // enters left → exits right, enters right → exits left
   )
 
   // Scale
