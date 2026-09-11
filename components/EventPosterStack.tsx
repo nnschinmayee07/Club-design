@@ -76,7 +76,9 @@ const ENTRY_VARIANTS = {
 export default function EventPosterStack() {
   const [selected, setSelected] = useState<number | null>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
-  const inView = useInView(sectionRef, { once: true, margin: '-10% 0px' })
+  const gridRef    = useRef<HTMLDivElement>(null)
+  const inView     = useInView(sectionRef, { once: true, margin: '-10% 0px' })
+  const gridInView = useInView(gridRef,    { once: true, margin: '-8% 0px' })
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -86,49 +88,91 @@ export default function EventPosterStack() {
   const events = literati.events
 
   return (
-    <div ref={sectionRef} style={{ position: 'relative', height: `${events.length * 100}vh` }}>
-      <div
-        className="sticky top-0 h-screen overflow-hidden"
-        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
-      >
-        {/* Section eyebrow */}
-        <div style={{ position: 'absolute', top: '2.5rem', left: 'clamp(1.5rem, 5vw, 4rem)', zIndex: 20 }}>
-          <p style={{
-            fontFamily: '-apple-system, sans-serif',
-            fontSize: '0.55rem',
-            fontWeight: 600,
-            letterSpacing: '0.32em',
-            textTransform: 'uppercase',
-            color: 'rgba(201,125,46,0.65)',
+    <>
+      {/* ── Scroll-through section: one card at a time ── */}
+      <div ref={sectionRef} style={{ position: 'relative', height: `${events.length * 100}vh` }}>
+        <div
+          className="sticky top-0 h-screen overflow-hidden"
+          style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <div style={{ position: 'absolute', top: '2.5rem', left: 'clamp(1.5rem, 5vw, 4rem)', zIndex: 20 }}>
+            <p style={{
+              fontFamily: '-apple-system, sans-serif', fontSize: '0.55rem', fontWeight: 600,
+              letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(201,125,46,0.65)',
+            }}>
+              Events
+            </p>
+          </div>
+
+          <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {events.map((event, i) => (
+              <ScrollCard
+                key={event.id}
+                event={event}
+                atmosphere={POSTER_ATMOSPHERES[i]}
+                index={i}
+                total={events.length}
+                scrollYProgress={scrollYProgress}
+                inView={inView}
+                onSelect={() => setSelected(i)}
+              />
+            ))}
+          </div>
+
+          <div style={{
+            position: 'absolute', bottom: '2.5rem', left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex', gap: '0.6rem', alignItems: 'center', zIndex: 20,
           }}>
-            Events
+            {events.map((_, i) => (
+              <PaginationDot key={i} index={i} total={events.length} scrollYProgress={scrollYProgress} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── All-cards grid: pops in after scroll section ── */}
+      <div
+        ref={gridRef}
+        style={{ padding: '10vh clamp(1.5rem, 5vw, 4rem) 8vh' }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '5vh' }}>
+          <p style={{
+            fontFamily: '-apple-system, sans-serif', fontSize: '0.55rem', fontWeight: 600,
+            letterSpacing: '0.32em', textTransform: 'uppercase',
+            color: 'rgba(201,125,46,0.65)', marginBottom: '0.6rem',
+          }}>
+            All Events
           </p>
+          <h2 style={{
+            fontFamily: 'Georgia, serif', fontWeight: 400,
+            fontSize: 'clamp(1.3rem, 3vw, 1.9rem)',
+            color: 'rgba(240,230,200,0.8)', letterSpacing: '-0.01em',
+          }}>
+            Tap any card to explore
+          </h2>
         </div>
 
-        {/* Cards stacked in center — each scroll-driven */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {events.map((event, i) => (
-            <ScrollCard
-              key={event.id}
-              event={event}
-              atmosphere={POSTER_ATMOSPHERES[i]}
-              index={i}
-              total={events.length}
-              scrollYProgress={scrollYProgress}
-              inView={inView}
-              onSelect={() => setSelected(i)}
-            />
-          ))}
-        </div>
-
-        {/* Pagination dots */}
         <div style={{
-          position: 'absolute', bottom: '2.5rem', left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex', gap: '0.6rem', alignItems: 'center', zIndex: 20,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: '1.25rem',
+          maxWidth: 1080,
+          margin: '0 auto',
         }}>
-          {events.map((_, i) => (
-            <PaginationDot key={i} index={i} total={events.length} scrollYProgress={scrollYProgress} />
+          {events.map((event, i) => (
+            <motion.div
+              key={event.id}
+              custom={i}
+              variants={ENTRY_VARIANTS}
+              initial="hidden"
+              animate={gridInView ? 'visible' : 'hidden'}
+              onClick={() => setSelected(i)}
+              whileHover={{ y: -7, transition: { duration: 0.22 } }}
+              style={{ cursor: 'pointer' }}
+            >
+              <GridCard event={event} atmosphere={POSTER_ATMOSPHERES[i]} />
+            </motion.div>
           ))}
         </div>
       </div>
@@ -143,7 +187,7 @@ export default function EventPosterStack() {
           />
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }
 
@@ -221,6 +265,77 @@ function ScrollCard({
     >
       <PosterCard event={event} atmosphere={atmosphere} />
     </motion.div>
+  )
+}
+
+// ─── Compact grid card ────────────────────────────────────────────────────────
+function GridCard({
+  event, atmosphere,
+}: {
+  event: typeof literati.events[0]
+  atmosphere: typeof POSTER_ATMOSPHERES[0]
+}) {
+  return (
+    <div style={{
+      height: 'clamp(260px, 35vh, 360px)',
+      position: 'relative', overflow: 'hidden', borderRadius: '14px',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.07)',
+    }}>
+      <div style={{ position: 'absolute', inset: 0, background: event.gradient }} />
+      {atmosphere.layers.map((l, li) => (
+        <div key={li} style={{ position: 'absolute', inset: 0, background: l.gradient }} />
+      ))}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.07,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        backgroundSize: '250px',
+      }} />
+
+      {/* Tag */}
+      <div style={{ position: 'absolute', top: 18, left: 18, right: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.48rem',
+          fontWeight: 600, letterSpacing: '0.26em', textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.36)',
+        }}>{event.tag}</span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.09)' }} />
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: '0.95rem', color: 'rgba(255,255,255,0.12)' }}>
+          {atmosphere.symbol}
+        </span>
+      </div>
+
+      {/* Center */}
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px',
+      }}>
+        <p style={{
+          fontFamily: 'Georgia, serif', fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+          fontWeight: 700, lineHeight: 0.93, letterSpacing: '-0.03em',
+          color: 'rgba(255,255,255,0.96)', marginBottom: '0.75rem',
+          textShadow: '0 2px 16px rgba(0,0,0,0.45)',
+        }}>{event.title}</p>
+        <p style={{
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.48rem',
+          letterSpacing: '0.22em', textTransform: 'uppercase',
+          color: atmosphere.accent, opacity: 0.85, marginBottom: '1.2rem',
+        }}>{event.subtitle}</p>
+        <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.18)', marginBottom: '1.2rem' }} />
+        <p style={{
+          fontFamily: 'Georgia, serif', fontStyle: 'italic',
+          fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, maxWidth: 180,
+        }}>{event.theme}</p>
+      </div>
+
+      {/* Tap hint */}
+      <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+        <span style={{
+          fontFamily: '-apple-system, sans-serif', fontSize: '0.44rem',
+          letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)',
+        }}>tap for details</span>
+      </div>
+      <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 55px rgba(0,0,0,0.32)', pointerEvents: 'none' }} />
+    </div>
   )
 }
 
