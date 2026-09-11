@@ -218,10 +218,10 @@ export default function MemoryLane() {
         <div className="relative z-20 px-8 md:px-16 mb-12 flex-shrink-0">
           <p className="eyebrow mb-3" style={{ color: 'var(--verdigris)' }}>Memory Lane</p>
           <div className="flex items-baseline gap-4">
-            <h2 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(1.8rem, 5vw, 3.5rem)', lineHeight: 1, letterSpacing: '-0.02em', color: 'var(--ink)' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(1.2rem, 3vw, 2.2rem)', lineHeight: 1, letterSpacing: '-0.02em', color: 'var(--ink)' }}>
               Moments from
             </h2>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 5vw, 3.5rem)', lineHeight: 1, letterSpacing: '-0.02em', color: 'var(--accent)' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: 'clamp(1.2rem, 3vw, 2.2rem)', lineHeight: 1, letterSpacing: '-0.02em', color: 'var(--accent)' }}>
               LITERATI
             </h2>
           </div>

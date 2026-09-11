@@ -37,7 +37,7 @@ export default function WhatIsLiterati() {
       <h2
         className="display"
         style={{
-          fontSize: 'clamp(2.4rem, 6vw, 5.5rem)',
+          fontSize: 'clamp(1.6rem, 3.8vw, 3.2rem)',
           lineHeight: 1.05,
           letterSpacing: '-0.025em',
         }}

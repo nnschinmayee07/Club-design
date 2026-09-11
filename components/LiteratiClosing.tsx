@@ -43,7 +43,7 @@ export default function LiteratiClosing() {
       <motion.h2
         className="display"
         style={{
-          fontSize: 'clamp(3rem, 10vw, 9rem)',
+          fontSize: 'clamp(2rem, 6vw, 5.5rem)',
           lineHeight: 0.9,
           letterSpacing: '-0.04em',
           marginBottom: '2.5rem',
