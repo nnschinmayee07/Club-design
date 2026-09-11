@@ -26,7 +26,7 @@ html {
 }
 
 body {
-  background-color: var(--ground);
+  background-color: #05030a;
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow-x: hidden;
@@ -109,15 +109,7 @@ body {
 
 /* ── Animation classes ───────────────────────────────────────── */
 
-.diffusion-orb-ambient {
-  animation: orb-drift linear infinite;
-  will-change: transform;
-}
-
-.diffusion-orb-scroll {
-  animation: orb-drift linear infinite;
-  will-change: opacity, transform;
-}
+/* diffusion orb classes removed — handled by DiffusionBackground inline styles */
 
 /* The shimmer gradient on the hero title */
 .title-shimmer {

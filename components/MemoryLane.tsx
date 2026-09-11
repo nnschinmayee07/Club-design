@@ -70,9 +70,8 @@ function TrailAndPlane({
   const pathId = `trail-${uid}`
 
   // Drive plane along path via offsetDistance
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+  useMotionValueEvent(scrollYProgress, 'change', (v: number) => {
     if (!planeRef.current) return
-    // clamp to 0–98% so plane doesn't disappear off end
     const pct = Math.min(v * 100, 98)
     planeRef.current.style.offsetDistance = `${pct}%`
   })
