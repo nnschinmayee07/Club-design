@@ -65,12 +65,14 @@ function WirePath({ memories }: { memories: typeof literati.memories }) {
         strokeWidth="6"
         filter="url(#trail-glow)"
       />
-      {/* Sharp top line */}
+      {/* Dotted top line */}
       <path
         d={d}
         fill="none"
-        stroke="rgba(201,125,46,0.75)"
-        strokeWidth="2"
+        stroke="rgba(201,125,46,0.85)"
+        strokeWidth="2.5"
+        strokeDasharray="4 8"
+        strokeLinecap="round"
       />
     </svg>
   )
