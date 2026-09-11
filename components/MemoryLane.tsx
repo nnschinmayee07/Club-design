@@ -16,23 +16,36 @@ const PHOTO_LAYOUT = [
   { rotate:  5,  yOffset: -20, scale: 0.90, size: 220 },
 ]
 
-// SVG wire path connecting polaroids — hand-crafted wave
+// SVG string-light path — matches reference: bright warm glow, nodes at each photo
 function WirePath({ memories }: { memories: typeof literati.memories }) {
+  const GAP = 320
   const count = memories.length
-  const W = count * 320
-  const H = 400
+  const W = count * GAP + 200
+  const H = 420
   const midY = H / 2
 
-  // Build a smooth wave: each photo is ~320px wide
-  let d = `M 60 ${midY}`
-  for (let i = 0; i < count; i++) {
+  // Compute anchor point for each photo (where the string "touches" the card)
+  const anchors: { x: number; y: number }[] = memories.map((_, i) => {
     const layout = PHOTO_LAYOUT[i % PHOTO_LAYOUT.length]
-    const cx = 60 + i * 320 + 160
-    const photoY = midY + layout.yOffset
-    const c1x = cx - 120
-    const c2x = cx + 120
-    d += ` C ${c1x} ${midY}, ${c2x} ${photoY + 40}, ${cx + 120} ${midY}`
-  }
+    return {
+      x: 80 + i * GAP + GAP / 2,
+      y: midY + layout.yOffset * 0.55,
+    }
+  })
+
+  // Build smooth cubic bezier through all anchors
+  let d = `M 0 ${midY}`
+  anchors.forEach((pt, i) => {
+    const prev = i === 0 ? { x: 0, y: midY } : anchors[i - 1]
+    const c1x = prev.x + (pt.x - prev.x) * 0.5
+    const c1y = prev.y
+    const c2x = prev.x + (pt.x - prev.x) * 0.5
+    const c2y = pt.y
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${pt.x} ${pt.y}`
+  })
+  // Trail off to the right
+  const last = anchors[anchors.length - 1]
+  d += ` C ${last.x + 100} ${last.y}, ${last.x + 180} ${midY}, ${W} ${midY}`
 
   return (
     <svg
@@ -45,35 +58,54 @@ function WirePath({ memories }: { memories: typeof literati.memories }) {
         height: H,
         pointerEvents: 'none',
         zIndex: 1,
+        overflow: 'visible',
       }}
       aria-hidden="true"
     >
       <defs>
-        <filter id="trail-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        {/* Wide soft glow */}
+        <filter id="string-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="blur1" />
+          <feGaussianBlur stdDeviation="2" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur1" />
+            <feMergeNode in="blur2" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        {/* Tight node glow */}
+        <filter id="node-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+        <radialGradient id="node-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(255,240,200,1)" />
+          <stop offset="60%" stopColor="rgba(240,180,80,0.8)" />
+          <stop offset="100%" stopColor="rgba(201,125,46,0)" />
+        </radialGradient>
       </defs>
-      {/* Glow underlayer */}
-      <path
-        d={d}
-        fill="none"
-        stroke="rgba(201,125,46,0.35)"
-        strokeWidth="6"
-        filter="url(#trail-glow)"
-      />
-      {/* Dotted top line */}
-      <path
-        d={d}
-        fill="none"
-        stroke="rgba(201,125,46,0.85)"
-        strokeWidth="2.5"
-        strokeDasharray="4 8"
-        strokeLinecap="round"
-      />
+
+      {/* Outermost wide glow — very soft, warm amber */}
+      <path d={d} fill="none" stroke="rgba(220,140,40,0.18)" strokeWidth="18" filter="url(#string-glow)" />
+      {/* Mid glow layer */}
+      <path d={d} fill="none" stroke="rgba(240,180,80,0.35)" strokeWidth="8" filter="url(#string-glow)" />
+      {/* Core bright string */}
+      <path d={d} fill="none" stroke="rgba(255,230,150,0.92)" strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* Glowing node dots at each photo anchor */}
+      {anchors.map((pt, i) => (
+        <g key={i} filter="url(#node-glow)">
+          {/* Outer halo */}
+          <circle cx={pt.x} cy={pt.y} r="10" fill="url(#node-grad)" opacity="0.7" />
+          {/* Inner bright dot */}
+          <circle cx={pt.x} cy={pt.y} r="3.5" fill="rgba(255,245,210,0.98)" />
+          {/* Tiny core */}
+          <circle cx={pt.x} cy={pt.y} r="1.5" fill="white" />
+        </g>
+      ))}
     </svg>
   )
 }
