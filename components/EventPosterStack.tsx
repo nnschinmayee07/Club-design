@@ -116,15 +116,16 @@ function PosterCard({
       : [0.84, 1, 1, 0.84],
   )
 
-  // Y — next poster rises from below
-  const y = useTransform(
+  // X — cards slide in alternately from left (even) and right (odd)
+  const fromLeft = index % 2 === 0
+  const x = useTransform(
     scrollYProgress,
     index === 0
       ? [0, segEnd - seg * 0.1, segEnd]
       : [segStart - seg * 0.05, segStart + seg * 0.35, segEnd - seg * 0.1, segEnd],
     index === 0
-      ? ['0vh', '0vh', '-10vh']
-      : ['55vh', '0vh', '0vh', '-10vh'],
+      ? ['0vw', '0vw', fromLeft ? '-60vw' : '60vw']
+      : [fromLeft ? '-80vw' : '80vw', '0vw', '0vw', fromLeft ? '-60vw' : '60vw'],
   )
 
   // Opacity
@@ -136,16 +137,16 @@ function PosterCard({
     index === 0 ? [1, 1, 1, 0] : [0, 1, 1, 0],
   )
 
-  // Slight rotation that resolves as poster becomes dominant
+  // Slight rotation that resolves as poster becomes dominant — mirrors the entry side
   const rotate = useTransform(
     scrollYProgress,
     [segStart, segStart + seg * 0.35],
-    index === 0 ? [0, 0] : [index % 2 === 0 ? 1.5 : -1.5, 0],
+    index === 0 ? [0, 0] : [fromLeft ? -4 : 4, 0],
   )
 
   return (
     <motion.div
-      style={{ scale, y, opacity, rotate, position: 'absolute', zIndex: index }}
+      style={{ scale, x, opacity, rotate, position: 'absolute', zIndex: index }}
       className="px-4 md:px-0"
     >
       <div

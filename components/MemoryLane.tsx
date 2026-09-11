@@ -48,12 +48,29 @@ function WirePath({ memories }: { memories: typeof literati.memories }) {
       }}
       aria-hidden="true"
     >
+      <defs>
+        <filter id="trail-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {/* Glow underlayer */}
       <path
         d={d}
         fill="none"
-        stroke="rgba(201,125,46,0.25)"
-        strokeWidth="1.5"
-        strokeDasharray="4 6"
+        stroke="rgba(201,125,46,0.35)"
+        strokeWidth="6"
+        filter="url(#trail-glow)"
+      />
+      {/* Sharp top line */}
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(201,125,46,0.75)"
+        strokeWidth="2"
       />
     </svg>
   )

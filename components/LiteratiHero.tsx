@@ -40,7 +40,7 @@ export default function LiteratiHero() {
       {/* Main title block */}
       <div className="relative z-10 text-center select-none px-6">
 
-        {/* LITERATI — enters from top, carries shimmer, parallax-faster */}
+        {/* LITERATI — falls from above the viewport downward */}
         <motion.div style={{ y: yTop }} className="overflow-visible">
           <div className="overflow-hidden">
             <motion.h1
@@ -50,16 +50,16 @@ export default function LiteratiHero() {
                 lineHeight: 0.88,
                 letterSpacing: '-0.04em',
               }}
-              initial={{ y: '-110%', opacity: 0 }}
+              initial={{ y: '-120%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             >
               LITERATI
             </motion.h1>
           </div>
         </motion.div>
 
-        {/* CLUB — enters from bottom, gold shimmer, parallax-slower */}
+        {/* CLUB — rises from below the viewport upward */}
         <motion.div style={{ y: yBottom }} className="overflow-visible">
           <div className="overflow-hidden">
             <motion.span
@@ -69,9 +69,9 @@ export default function LiteratiHero() {
                 lineHeight: 0.88,
                 letterSpacing: '-0.04em',
               }}
-              initial={{ y: '110%', opacity: 0 }}
+              initial={{ y: '120%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             >
               CLUB
             </motion.span>
