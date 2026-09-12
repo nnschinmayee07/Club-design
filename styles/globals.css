@@ -199,6 +199,22 @@ body {
   }
 }
 
+/* ── Diffusion ambient drift ─────────────────────────────────── */
+
+@keyframes ambient-drift-a {
+  0%   { transform: translate3d(-50%,-50%,0) scale(1) rotate(0deg); }
+  35%  { transform: translate3d(calc(-50% + 28px), calc(-50% - 18px), 0) scale(1.06) rotate(2deg); }
+  70%  { transform: translate3d(calc(-50% - 16px), calc(-50% + 24px), 0) scale(0.96) rotate(-1.5deg); }
+  100% { transform: translate3d(calc(-50% + 10px), calc(-50% + 12px), 0) scale(1.03) rotate(1deg); }
+}
+
+@keyframes ambient-drift-b {
+  0%   { transform: translate3d(-50%,-50%,0) scale(1) rotate(0deg); }
+  40%  { transform: translate3d(calc(-50% - 22px), calc(-50% + 20px), 0) scale(1.05) rotate(-2deg); }
+  72%  { transform: translate3d(calc(-50% + 18px), calc(-50% - 14px), 0) scale(0.97) rotate(1.5deg); }
+  100% { transform: translate3d(calc(-50% - 8px),  calc(-50% + 10px), 0) scale(1.02) rotate(-1deg); }
+}
+
 /* ── Utilities ───────────────────────────────────────────────── */
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
