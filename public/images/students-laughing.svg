@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
   <defs>
     <radialGradient id="bg" cx="45%" cy="55%" r="70%">
-      <stop offset="0%" stop-color="#7a3aaa" stop-opacity="0.9"/>
-      <stop offset="50%" stop-color="#1a0e2a" stop-opacity="0.95"/>
-      <stop offset="100%" stop-color="#1a0e2a" stop-opacity="1"/>
+      <stop offset="0%" stop-color="#8a3aaa" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#1e0e28" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#1e0e28" stop-opacity="1"/>
     </radialGradient>
-    <radialGradient id="light" cx="35%" cy="25%" r="40%">
-      <stop offset="0%" stop-color="rgba(180,140,220,0.6)"/>
+    <radialGradient id="light" cx="45%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="rgba(200,150,230,0.55)"/>
       <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
     </radialGradient>
     <filter id="noise">
@@ -16,18 +16,18 @@
       <feComposite in="noisy" in2="SourceGraphic" operator="in"/>
     </filter>
   </defs>
-  <rect width="1600" height="900" fill="#1a0e2a"/>
+  <rect width="1600" height="900" fill="#1e0e28"/>
   <rect width="1600" height="900" fill="url(#bg)"/>
   <rect width="1600" height="900" fill="url(#light)" opacity="0.7"/>
   <!-- Simulated subject forms -->
-  <ellipse cx="800" cy="480" rx="400" ry="280" fill="#7a3aaa" opacity="0.15"/>
-  <ellipse cx="600" cy="350" rx="200" ry="160" fill="rgba(180,140,220,0.6)" opacity="0.08"/>
+  <ellipse cx="800" cy="480" rx="400" ry="280" fill="#8a3aaa" opacity="0.15"/>
+  <ellipse cx="600" cy="350" rx="200" ry="160" fill="rgba(200,150,230,0.55)" opacity="0.08"/>
   <!-- Grain overlay -->
   <rect width="1600" height="900" filter="url(#noise)" opacity="0.12"/>
   <!-- Vignette -->
   <radialGradient id="vig" cx="50%" cy="50%" r="70%">
     <stop offset="40%" stop-color="transparent"/>
-    <stop offset="100%" stop-color="#1a0e2a" stop-opacity="0.85"/>
+    <stop offset="100%" stop-color="#1e0e28" stop-opacity="0.85"/>
   </radialGradient>
   <rect width="1600" height="900" fill="url(#vig)"/>
 </svg>

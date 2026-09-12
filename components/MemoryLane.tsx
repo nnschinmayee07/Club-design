@@ -1,91 +1,116 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { literati } from '@/data/literati'
 
-const GAP = 320
+const GAP = 300
 
-const PHOTO_LAYOUT = [
-  { rotate: -5,  yOffset:  55, scale: 1.05, size: 260 },
-  { rotate:  7,  yOffset: -45, scale: 0.93, size: 225 },
-  { rotate: -3,  yOffset:  25, scale: 1.08, size: 275 },
-  { rotate:  9,  yOffset: -60, scale: 0.90, size: 215 },
-  { rotate: -7,  yOffset:  48, scale: 1.0,  size: 250 },
-  { rotate:  4,  yOffset: -32, scale: 0.96, size: 235 },
-  { rotate: -10, yOffset:  38, scale: 1.03, size: 255 },
-  { rotate:  6,  yOffset: -22, scale: 0.92, size: 222 },
+// Each photo's tilt, vertical offset, and size — alternating rhythm
+const LAYOUT = [
+  { rotate: -4,  yOffset:  50, scale: 1.04, size: 255 },
+  { rotate:  6,  yOffset: -42, scale: 0.94, size: 220 },
+  { rotate: -2,  yOffset:  28, scale: 1.07, size: 268 },
+  { rotate:  8,  yOffset: -55, scale: 0.91, size: 218 },
+  { rotate: -6,  yOffset:  44, scale: 1.0,  size: 248 },
+  { rotate:  3,  yOffset: -28, scale: 0.96, size: 232 },
+  { rotate: -8,  yOffset:  36, scale: 1.02, size: 252 },
+  { rotate:  5,  yOffset: -20, scale: 0.93, size: 224 },
 ]
 
 function Polaroid({
   memory,
   layout,
   index,
+  scrollYProgress,
+  total,
 }: {
   memory: typeof literati.memories[0]
-  layout: typeof PHOTO_LAYOUT[0]
+  layout: typeof LAYOUT[0]
   index: number
+  scrollYProgress: any
+  total: number
 }) {
-  const swayDur   = 3.0 + (index % 4) * 0.6
-  const swayDelay = index * 0.2
+  // Each photo reveals when the strip has panned far enough to reach it
+  // Map photo index to a scroll threshold
+  const revealAt = (index / total) * 0.85
+  const opacity = useTransform(scrollYProgress, [revealAt, revealAt + 0.07], [0, 1])
+  const y = useTransform(scrollYProgress, [revealAt, revealAt + 0.07], [32, layout.yOffset])
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, rotate: layout.rotate * 2.5, scale: 0.8 }}
-      whileInView={{ opacity: 1, y: layout.yOffset, rotate: layout.rotate, scale: layout.scale }}
-      viewport={{ once: true, margin: '0px -20%' }}
-      transition={{ delay: index * 0.06, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: layout.scale * 1.07, rotate: layout.rotate * 0.2, zIndex: 40, transition: { duration: 0.22 } }}
       style={{
+        opacity,
+        y,
+        rotate: layout.rotate,
+        scale: layout.scale,
         position: 'relative',
-        zIndex: 5 + index,
+        zIndex: 5,
         flexShrink: 0,
         width: layout.size,
         cursor: 'default',
-        animation: `photo-sway-${index % 4} ${swayDur}s ease-in-out ${swayDelay}s infinite alternate`,
+      }}
+      whileHover={{
+        scale: layout.scale * 1.06,
+        rotate: layout.rotate * 0.2,
+        zIndex: 20,
+        transition: { duration: 0.22 },
       }}
     >
+      {/* Polaroid frame */}
       <div style={{
-        background: '#f0ead8',
-        padding: '10px 10px 40px 10px',
-        boxShadow: '0 14px 52px rgba(0,0,0,0.55), 0 3px 10px rgba(0,0,0,0.28)',
-        borderRadius: '16px',
+        background: '#ede8d8',
+        padding: '10px 10px 42px 10px',
+        boxShadow: '0 16px 56px rgba(0,0,0,0.62), 0 4px 12px rgba(0,0,0,0.32)',
+        borderRadius: '4px',
       }}>
-        {/* Photo */}
+        {/* Photo area */}
         <div style={{
-          width: '100%', aspectRatio: '4/3',
-          overflow: 'hidden', position: 'relative',
-          background: memory.placeholder, borderRadius: '8px',
+          width: '100%',
+          aspectRatio: '4/3',
+          overflow: 'hidden',
+          position: 'relative',
+          background: memory.placeholder,
+          borderRadius: '2px',
         }}>
           <div style={{
             position: 'absolute', inset: 0,
             backgroundImage: `url(${memory.src})`,
-            backgroundSize: 'cover', backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }} />
-          {/* Film grain */}
+          {/* Film grain on photo */}
           <div style={{
-            position: 'absolute', inset: 0, opacity: 0.10,
+            position: 'absolute', inset: 0, opacity: 0.09,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: '150px',
           }} />
-          {/* Corner vignette */}
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.42) 100%)' }} />
-          {/* Label chip */}
+          {/* Vignette */}
           <div style={{
-            position: 'absolute', bottom: 7, left: 8,
-            fontFamily: '-apple-system, sans-serif', fontSize: '0.45rem',
-            fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.58)',
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.40) 100%)',
+          }} />
+          {/* Label */}
+          <span style={{
+            position: 'absolute', bottom: 7, left: 9,
+            fontFamily: '-apple-system, sans-serif',
+            fontSize: '0.44rem', fontWeight: 600,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.55)',
           }}>
             {memory.label}
-          </div>
+          </span>
         </div>
 
-        {/* Handwritten-style caption */}
+        {/* Handwritten caption */}
         <p style={{
-          fontFamily: 'Georgia, serif', fontStyle: 'italic',
-          fontSize: '0.7rem', color: '#3a2e22',
-          textAlign: 'center', paddingTop: '8px', lineHeight: 1.4,
+          fontFamily: 'Georgia, serif',
+          fontStyle: 'italic',
+          fontSize: '0.68rem',
+          color: '#3a2e22',
+          textAlign: 'center',
+          paddingTop: '9px',
+          lineHeight: 1.38,
         }}>
           {memory.title}
         </p>
@@ -102,106 +127,100 @@ export default function MemoryLane() {
   })
 
   const memories = literati.memories
-  const STRIP_WIDTH = memories.length * GAP + 200
-  const x = useTransform(scrollYProgress, [0, 1], ['4%', `${-(STRIP_WIDTH - 1100)}px`])
+  const STRIP_WIDTH = memories.length * GAP + 280
+  const x = useTransform(scrollYProgress, [0, 1], ['2%', `${-(STRIP_WIDTH - 1050)}px`])
 
   return (
     <section
       ref={ref}
-      className="relative"
       style={{
         height: `${memories.length * 80}vh`,
-        minHeight: '600px',
+        minHeight: 600,
+        position: 'relative',
         contentVisibility: 'auto',
         containIntrinsicSize: '0 600px',
       }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
-
+      <div
+        className="sticky top-0 h-screen overflow-hidden"
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+      >
         {/* Header */}
-        <div className="relative z-20 px-8 md:px-16 mb-12 flex-shrink-0">
-          <p className="eyebrow mb-3" style={{ color: 'var(--verdigris)' }}>Memory Lane</p>
-          <div className="flex items-baseline gap-4">
+        <div style={{ padding: '0 clamp(1.5rem, 5vw, 4rem)', marginBottom: '2.5vh', flexShrink: 0 }}>
+          <p style={{
+            fontFamily: '-apple-system, sans-serif',
+            fontSize: '0.55rem', fontWeight: 600,
+            letterSpacing: '0.32em', textTransform: 'uppercase',
+            color: 'var(--verdigris)', marginBottom: '0.5rem',
+          }}>
+            Memory Lane
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
             <h2 style={{
               fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 700,
-              fontSize: 'clamp(1.2rem, 3vw, 2.2rem)', lineHeight: 1,
+              fontSize: 'clamp(1.2rem, 2.8vw, 2rem)', lineHeight: 1,
               letterSpacing: '-0.02em', color: 'var(--ink)',
             }}>
               Moments from
             </h2>
             <h2 style={{
               fontFamily: 'Georgia, serif', fontWeight: 700,
-              fontSize: 'clamp(1.2rem, 3vw, 2.2rem)', lineHeight: 1,
+              fontSize: 'clamp(1.2rem, 2.8vw, 2rem)', lineHeight: 1,
               letterSpacing: '-0.02em', color: 'var(--accent)',
             }}>
               LITERATI
             </h2>
           </div>
-          <p style={{ color: 'var(--ink-dim)', fontSize: '0.8125rem', marginTop: '0.75rem', fontStyle: 'italic' }}>
+          <p style={{
+            color: 'var(--ink-dim)', fontSize: '0.78rem',
+            marginTop: '0.6rem', fontStyle: 'italic',
+          }}>
             Every moment, a story.
           </p>
         </div>
 
-        {/* Scroll-panned photo strip */}
-        <motion.div
-          style={{
-            x,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 48,
-            paddingLeft: 80,
-            paddingRight: 120,
-            position: 'relative',
-            zIndex: 10,
-          }}
-        >
+        {/* Scroll-panned strip */}
+        <motion.div style={{
+          x,
+          display: 'flex',
+          alignItems: 'center',
+          gap: GAP - 160,
+          paddingLeft: 72,
+          paddingRight: 100,
+          position: 'relative',
+          zIndex: 10,
+          flexShrink: 0,
+        }}>
           {memories.map((memory, i) => (
             <Polaroid
               key={i}
               memory={memory}
-              layout={PHOTO_LAYOUT[i % PHOTO_LAYOUT.length]}
+              layout={LAYOUT[i % LAYOUT.length]}
               index={i}
+              scrollYProgress={scrollYProgress}
+              total={memories.length}
             />
           ))}
 
-          {/* Closing quote card */}
-          <div style={{ flexShrink: 0, paddingLeft: 40, maxWidth: 260 }}>
+          {/* Closing quote */}
+          <div style={{ flexShrink: 0, paddingLeft: 36, maxWidth: 240 }}>
             <p style={{
-              fontFamily: 'Georgia, serif', fontSize: '1rem',
-              fontStyle: 'italic', color: 'var(--ink-muted)', lineHeight: 1.7,
+              fontFamily: 'Georgia, serif', fontSize: '0.95rem',
+              fontStyle: 'italic', color: 'var(--ink-muted)', lineHeight: 1.72,
             }}>
               "We don't just practise speaking.<br />We find the courage to mean it."
             </p>
-            <p className="eyebrow" style={{ marginTop: '1.5rem', color: 'var(--ink-dim)', fontSize: '0.55rem' }}>
+            <p style={{
+              fontFamily: '-apple-system, sans-serif',
+              fontSize: '0.5rem', letterSpacing: '0.22em',
+              textTransform: 'uppercase', color: 'var(--ink-dim)',
+              marginTop: '1.2rem',
+            }}>
               Club Literati · MLRIT
             </p>
           </div>
         </motion.div>
-
       </div>
-
-      {/* Sway keyframes */}
-      <style>{`
-        @keyframes photo-sway-0 {
-          from { transform: translateY(0px) rotate(0deg); }
-          to   { transform: translateY(-10px) rotate(1.4deg); }
-        }
-        @keyframes photo-sway-1 {
-          from { transform: translateY(0px) rotate(0deg); }
-          to   { transform: translateY(8px) rotate(-1.7deg); }
-        }
-        @keyframes photo-sway-2 {
-          from { transform: translateY(0px) rotate(0deg); }
-          to   { transform: translateY(-7px) rotate(1.1deg); }
-        }
-        @keyframes photo-sway-3 {
-          from { transform: translateY(0px) rotate(0deg); }
-          to   { transform: translateY(9px) rotate(-1.3deg); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [style*="photo-sway"] { animation: none !important; }
-        }
-      `}</style>
     </section>
   )
 }

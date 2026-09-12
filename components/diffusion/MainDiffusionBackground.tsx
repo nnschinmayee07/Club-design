@@ -2,50 +2,66 @@
 
 import ScrollDiffusionGallery, { type DiffusionScene } from './ScrollDiffusionGallery'
 
+// ─── Scene timing guide ────────────────────────────────────────────────────────
+// Page layout (approximate scroll fractions):
+//   0.00 – 0.12  → Hero (dark, no photo — intentional)
+//   0.12 – 0.28  → What Is Literati
+//   0.28 – 0.55  → Event Poster scroll (4 × 100vh ≈ 28% of total)
+//   0.55 – 0.75  → All-events grid
+//   0.75 – 0.95  → Memory Lane
+//   0.95 – 1.00  → Closing
+//
+// Each photo enters dark-side-early, peaks in the middle of its section,
+// and dissolves before the next section begins.
+//
+// inEnd - inStart = ~0.08 (photo develops over this range)
+// outEnd - outStart = ~0.07 (photo dissolves over this range)
+// Peak window (inEnd → outStart) = content section midpoint
+
 const PAGE_SCENES: DiffusionScene[] = [
-  // Scene 1 — hero/what-is section (violet)
+  // Scene 1 — What Is Literati (deep violet)
+  // Starts emerging just as hero exits, peaks mid-section
   {
     image: '/images/library-wide-1.svg',
-    accent: 'rgba(75,10,160,0.72)',
-    accentSecondary: 'rgba(130,15,110,0.50)',
-    position: 'center 30%',
-    x: '44%', y: '52%',
-    inStart: 0.05, inEnd: 0.14,
-    outStart: 0.28, outEnd: 0.38,
+    accent: 'rgba(72, 8, 155, 0.65)',
+    accentSecondary: 'rgba(120, 12, 105, 0.40)',
+    x: '43%', y: '52%',
+    inStart: 0.11, inEnd: 0.20,
+    outStart: 0.26, outEnd: 0.33,
   },
-  // Scene 2 — events (magenta)
+
+  // Scene 2 — Events section (magenta/purple)
+  // Emerges as user begins scrolling through posters
   {
     image: '/images/debate-session.svg',
-    accent: 'rgba(160,12,130,0.70)',
-    accentSecondary: 'rgba(55,8,195,0.48)',
-    position: 'center 40%',
-    x: '56%', y: '50%',
-    inStart: 0.32, inEnd: 0.42,
-    outStart: 0.56, outEnd: 0.65,
+    accent: 'rgba(145, 10, 120, 0.62)',
+    accentSecondary: 'rgba(50, 6, 180, 0.36)',
+    x: '57%', y: '49%',
+    inStart: 0.30, inEnd: 0.38,
+    outStart: 0.50, outEnd: 0.57,
   },
-  // Scene 3 — event posters (indigo)
+
+  // Scene 3 — Mid-events / grid (indigo)
   {
     image: '/images/talkmasters.svg',
-    accent: 'rgba(30,45,185,0.68)',
-    accentSecondary: 'rgba(100,10,155,0.48)',
-    position: 'center 35%',
-    x: '50%', y: '54%',
-    inStart: 0.58, inEnd: 0.67,
-    outStart: 0.80, outEnd: 0.88,
+    accent: 'rgba(28, 40, 175, 0.60)',
+    accentSecondary: 'rgba(95, 8, 148, 0.38)',
+    x: '50%', y: '53%',
+    inStart: 0.55, inEnd: 0.63,
+    outStart: 0.72, outEnd: 0.79,
   },
-  // Scene 4 — memory lane (deep purple/magenta)
+
+  // Scene 4 — Memory Lane (richest purple/magenta — memories emerging)
   {
     image: '/images/campus-group.svg',
-    accent: 'rgba(120,8,160,0.75)',
-    accentSecondary: 'rgba(180,18,100,0.52)',
-    position: 'center 45%',
+    accent: 'rgba(115, 6, 148, 0.70)',
+    accentSecondary: 'rgba(168, 15, 90, 0.44)',
     x: '48%', y: '50%',
-    inStart: 0.82, inEnd: 0.90,
-    outStart: 0.97, outEnd: 1.0,
+    inStart: 0.77, inEnd: 0.85,
+    outStart: 0.93, outEnd: 1.0,
   },
 ]
 
 export default function MainDiffusionBackground() {
-  // useWindowScroll=true tracks document scroll progress 0→1
   return <ScrollDiffusionGallery scenes={PAGE_SCENES} useWindowScroll />
 }

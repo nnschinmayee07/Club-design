@@ -1,7 +1,9 @@
 'use client'
 
-// Injects the SVG filter definitions needed for organic turbulence masking.
-// One instance per page is enough — filters are referenced by id from CSS.
+// SVG filter definitions for the diffusion system.
+// ink-develop: applied to the photo layer — displaces its mask edge irregularly
+// ink-atmosphere: applied to color haze clouds — heavily blurs and distorts them
+// Keep this component mounted once at the top of the page.
 export function DiffusionFilterDefs() {
   return (
     <svg
@@ -11,98 +13,80 @@ export function DiffusionFilterDefs() {
       style={{ position: 'absolute', pointerEvents: 'none', overflow: 'hidden' }}
     >
       <defs>
-        {/*
-          ink-displace:
-          feTurbulence generates a noise field.
-          feDisplacementMap pushes every pixel by that noise → organic edges.
-          feGaussianBlur softens the result so it reads as diffusion not glitch.
-        */}
+        {/* Photo edge distortion — turbulence displaces the mask boundary */}
         <filter
-          id="ink-displace"
-          x="-40%"
-          y="-40%"
-          width="180%"
-          height="180%"
-          colorInterpolationFilters="linearRGB"
+          id="ink-develop"
+          x="-45%" y="-45%"
+          width="190%" height="190%"
+          colorInterpolationFilters="sRGB"
         >
           <feTurbulence
             type="turbulence"
-            baseFrequency="0.006 0.009"
-            numOctaves="4"
-            seed="7"
-            result="noise"
+            baseFrequency="0.0055 0.008"
+            numOctaves="5"
+            seed="12"
+            result="turb"
           />
           <feDisplacementMap
             in="SourceGraphic"
-            in2="noise"
-            scale="140"
+            in2="turb"
+            scale="160"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          <feGaussianBlur in="displaced" stdDeviation="22" result="soft" />
-          <feBlend in="soft" in2="displaced" mode="normal" result="merged" />
-          <feComposite in="merged" in2="SourceGraphic" operator="in" />
+          <feGaussianBlur in="displaced" stdDeviation="18" result="soft" />
+          <feComposite in="soft" in2="SourceGraphic" operator="in" />
         </filter>
 
-        {/*
-          ink-haze:
-          Used for the atmospheric color clouds around the photo.
-          Heavier displacement, more blur → more ink-in-water feel.
-        */}
+        {/* Color atmosphere distortion — very heavy blur, used on haze clouds */}
         <filter
-          id="ink-haze"
-          x="-50%"
-          y="-50%"
-          width="200%"
-          height="200%"
-          colorInterpolationFilters="linearRGB"
+          id="ink-atmosphere"
+          x="-60%" y="-60%"
+          width="220%" height="220%"
+          colorInterpolationFilters="sRGB"
         >
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.007 0.010"
+            baseFrequency="0.006 0.009"
             numOctaves="3"
-            seed="13"
-            result="noise"
+            seed="5"
+            result="turb"
           />
           <feDisplacementMap
             in="SourceGraphic"
-            in2="noise"
-            scale="180"
+            in2="turb"
+            scale="200"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          <feGaussianBlur in="displaced" stdDeviation="40" />
+          <feGaussianBlur in="displaced" stdDeviation="50" />
         </filter>
 
-        {/*
-          ink-displace-lite: mobile version — cheaper
-        */}
+        {/* Lite version for reduced-motion / mobile */}
         <filter
-          id="ink-displace-lite"
-          x="-30%"
-          y="-30%"
-          width="160%"
-          height="160%"
-          colorInterpolationFilters="linearRGB"
+          id="ink-develop-lite"
+          x="-30%" y="-30%"
+          width="160%" height="160%"
+          colorInterpolationFilters="sRGB"
         >
           <feTurbulence
             type="turbulence"
             baseFrequency="0.008 0.011"
             numOctaves="2"
-            seed="7"
-            result="noise"
+            seed="12"
+            result="turb"
           />
           <feDisplacementMap
             in="SourceGraphic"
-            in2="noise"
+            in2="turb"
             scale="80"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          <feGaussianBlur in="displaced" stdDeviation="14" />
+          <feGaussianBlur in="displaced" stdDeviation="10" />
         </filter>
       </defs>
     </svg>

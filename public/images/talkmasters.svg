@@ -1,24 +1,33 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
   <defs>
-    <radialGradient id='bg' cx='50%' cy='50%' r='70%'>
-      <stop offset='0%' stop-color='rgb(40,60,200)' stop-opacity='0.9'/>
-      <stop offset='60%' stop-color='#0a0f2e' stop-opacity='1'/>
-      <stop offset='100%' stop-color='#030108' stop-opacity='1'/>
+    <radialGradient id="bg" cx="45%" cy="55%" r="70%">
+      <stop offset="0%" stop-color="#6a2a9a" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#1a0a2e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#1a0a2e" stop-opacity="1"/>
     </radialGradient>
-    <filter id='n'>
-      <feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/>
-      <feColorMatrix type='saturate' values='0'/>
-      <feBlend in='SourceGraphic' mode='multiply'/>
+    <radialGradient id="light" cx="50%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="rgba(160,120,220,0.5)"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feBlend in="SourceGraphic" mode="overlay" result="noisy"/>
+      <feComposite in="noisy" in2="SourceGraphic" operator="in"/>
     </filter>
-    <radialGradient id='light' cx='40%' cy='35%' r='45%'>
-      <stop offset='0%' stop-color='rgb(120,120,240)' stop-opacity='0.5'/>
-      <stop offset='100%' stop-color='transparent' stop-opacity='0'/>
-    </radialGradient>
   </defs>
-  <rect width='100%' height='100%' fill='url(#bg)'/>
-  <rect width='100%' height='100%' fill='url(#light)'/>
-  <rect width='100%' height='100%' fill='#1d4ed8' opacity='0.12' filter='url(#n)'/>
-  <text x='800' y='460' font-family='Georgia,serif' font-size='48' fill='rgba(255,255,255,0.15)' text-anchor='middle' font-style='italic'>
-    talkmasters
-  </text>
+  <rect width="1600" height="900" fill="#1a0a2e"/>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#light)" opacity="0.7"/>
+  <!-- Simulated subject forms -->
+  <ellipse cx="800" cy="480" rx="400" ry="280" fill="#6a2a9a" opacity="0.15"/>
+  <ellipse cx="600" cy="350" rx="200" ry="160" fill="rgba(160,120,220,0.5)" opacity="0.08"/>
+  <!-- Grain overlay -->
+  <rect width="1600" height="900" filter="url(#noise)" opacity="0.12"/>
+  <!-- Vignette -->
+  <radialGradient id="vig" cx="50%" cy="50%" r="70%">
+    <stop offset="40%" stop-color="transparent"/>
+    <stop offset="100%" stop-color="#1a0a2e" stop-opacity="0.85"/>
+  </radialGradient>
+  <rect width="1600" height="900" fill="url(#vig)"/>
 </svg>

@@ -11,25 +11,25 @@ import { BackgroundImageSceneDirect, type ImageScene } from './BackgroundImageSc
 
 const SCENES: ImageScene[] = [
   {
-    src: '/images/library-wide-1.jpg',
+    src: '/images/library-wide-1.svg',
     accent: 'rgba(80,20,140,0.55)',
     position: 'center 30%',
     inStart: 0.08, inEnd: 0.22, outStart: 0.32, outEnd: 0.44,
   },
   {
-    src: '/images/debate-session.jpg',
+    src: '/images/debate-session.svg',
     accent: 'rgba(160,30,120,0.5)',
     position: 'center 40%',
     inStart: 0.36, inEnd: 0.50, outStart: 0.60, outEnd: 0.72,
   },
   {
-    src: '/images/talkmasters.jpg',
+    src: '/images/talkmasters.svg',
     accent: 'rgba(40,60,180,0.5)',
     position: 'center 35%',
     inStart: 0.62, inEnd: 0.74, outStart: 0.82, outEnd: 0.92,
   },
   {
-    src: '/images/campus-group.jpg',
+    src: '/images/campus-group.svg',
     accent: 'rgba(120,20,160,0.5)',
     position: 'center 45%',
     inStart: 0.84, inEnd: 0.92, outStart: 0.96, outEnd: 1.0,
