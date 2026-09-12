@@ -26,7 +26,7 @@ export default function WhatIsLiterati() {
   const copyY          = useTransform(smoothProgress, [0.55, 0.75], [28, 0])
 
   return (
-    <section ref={ref} className="relative z-10 px-6 md:px-16 lg:px-24 py-40 md:py-56 max-w-5xl mx-auto">
+    <section id="section-what" ref={ref} className="relative z-10 px-6 md:px-16 lg:px-24 py-40 md:py-56 max-w-5xl mx-auto">
       <motion.p
         className="eyebrow mb-12"
         style={{ x: eyebrowX, opacity: eyebrowOpacity }}

@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 import LiteratiHero from '@/components/LiteratiHero'
-import MainDiffusionBackground from '@/components/diffusion/MainDiffusionBackground'
+import PageDiffusion from '@/components/diffusion/PageDiffusion'
 
 const WhatIsLiterati   = dynamic(() => import('@/components/WhatIsLiterati'),   { ssr: false })
 const EventPosterStack = dynamic(() => import('@/components/EventPosterStack'), { ssr: false })
@@ -10,8 +10,12 @@ const LiteratiClosing  = dynamic(() => import('@/components/LiteratiClosing'),  
 export default function LiteratiPage() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#04020a' }}>
-      {/* Diffusion background — fixed, starts after hero */}
-      <MainDiffusionBackground />
+      {/*
+        PageDiffusion owns the fixed SVG filters, ambient hazes, grain, and vignette.
+        It also renders the four section-coupled photo scenes via SectionPhoto.
+        Each SectionPhoto tracks its own section ref for precise scroll coupling.
+      */}
+      <PageDiffusion />
 
       <main style={{ position: 'relative', zIndex: 10 }}>
         <LiteratiHero />

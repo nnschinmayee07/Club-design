@@ -132,6 +132,7 @@ export default function MemoryLane() {
 
   return (
     <section
+      id="section-memory"
       ref={ref}
       style={{
         height: `${memories.length * 80}vh`,

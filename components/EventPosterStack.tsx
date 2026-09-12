@@ -90,7 +90,7 @@ export default function EventPosterStack() {
   return (
     <>
       {/* ── Scroll-through section: one card at a time ── */}
-      <div ref={sectionRef} style={{ position: 'relative', height: `${events.length * 100}vh` }}>
+      <div id="section-events" ref={sectionRef} style={{ position: 'relative', height: `${events.length * 100}vh` }}>
         <div
           className="sticky top-0 h-screen"
           style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', overflow: 'clip' }}

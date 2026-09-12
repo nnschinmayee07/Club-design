@@ -18,6 +18,7 @@ export default function LiteratiClosing() {
 
   return (
     <section
+      id="section-closing"
       ref={ref}
       className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 text-center"
       style={{ paddingTop: '10vh', paddingBottom: '15vh' }}
