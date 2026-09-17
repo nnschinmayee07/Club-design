@@ -225,23 +225,11 @@ export default function ApexMemoryLane() {
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
-  // Auto-advance every 3.5 s when idle (not dragging, velocity settled)
-  const autoRef = useRef<ReturnType<typeof setInterval>>();
-  useEffect(() => {
-    autoRef.current = setInterval(() => {
-      if (!draggingRef.current && Math.abs(velRef.current) < SNAP_THRESHOLD) {
-        velRef.current = 0.9; // gentle forward nudge
-        startLoop();
-      }
-    }, 3500);
-    return () => clearInterval(autoRef.current);
-  }, [startLoop]);
 
   // Drag handlers
   const onDragStart = useCallback(() => {
     draggingRef.current = true;
     velRef.current = 0;
-    clearInterval(autoRef.current); // pause auto on user interaction
     startLoop();
   }, [startLoop]);
 
@@ -257,14 +245,6 @@ export default function ApexMemoryLane() {
     const rawVel = -(info.velocity.x / (CARD_W + GAP)) * DRAG_SENSITIVITY;
     velRef.current = Math.max(-VELOCITY_CLAMP, Math.min(VELOCITY_CLAMP, rawVel));
     startLoop();
-    // Restart auto-advance
-    clearInterval(autoRef.current);
-    autoRef.current = setInterval(() => {
-      if (!draggingRef.current && Math.abs(velRef.current) < SNAP_THRESHOLD) {
-        velRef.current = 0.9;
-        startLoop();
-      }
-    }, 3500);
   }, [startLoop]);
 
   // Click nav buttons — spring snap (jump vel, let loop settle)
